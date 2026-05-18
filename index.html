@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tính Oxy Lâm Sàng Nhanh</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: #f4f6f9;
+            transition: background-color 0.5s ease;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #1F497D;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-volume {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            background: #fff;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-volume.active {
+            border-color: #2B4C7E;
+            background-color: #E2EFDA;
+            color: #276A3C;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+        }
+        .slider-value {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2B4C7E;
+            margin-top: 5px;
+        }
+        .flow-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .btn-math {
+            width: 45px;
+            height: 45px;
+            font-size: 24px;
+            font-weight: bold;
+            background: #2B4C7E;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        #flow-display {
+            font-size: 22px;
+            font-weight: bold;
+            width: 80px;
+            text-align: center;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: #2B4C7E;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        /* Màn hình kết quả */
+        #result-screen {
+            display: none;
+            text-align: center;
+            padding: 30px 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            color: #fff;
+        }
+        .result-time {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .result-alert {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-back {
+            background: rgba(255,255,255,0.3);
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="main-container">
+    <h2>📱 TÍNH OXY LÂM SÀNG NHANH</h2>
+    <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+
+    <!-- Bước 1: Chọn bình -->
+    <div class="form-group">
+        <label>1. Chọn loại bình Oxy (V):</label>
+        <div class="btn-group">
+            <button class="btn-volume active" onclick="selectVolume(5, this)">5 Lít</button>
+            <button class="btn-volume" onclick="selectVolume(10, this)">10 Lít</button>
+            <button class="btn-volume" onclick="selectVolume(40, this)">40 Lít</button>
+        </div>
+    </div>
+
+    <!-- Bước 2: Nhập Áp Suất -->
+    <div class="form-group">
+        <label>2. Áp suất đồng hồ (P - bar):</label>
+        <input type="range" id="pressure-slider" min="10" max="150" value="100" oninput="updatePressure(this.value)">
+        <div class="slider-value" id="pressure-val">100 bar</div>
+    </div>
+
+    <!-- Bước 3: Nhập Lưu Lượng -->
+    <div class="form-group">
+        <label>3. Lưu lượng thở Y lệnh (F - Lít/phút):</label>
+        <div class="flow-controls">
+            <button class="btn-math" onclick="changeFlow(-1)">-</button>
+            <div id="flow-display">5 L/p</div>
+            <button class="btn-math" onclick="changeFlow(1)">+</button>
+        </div>
+    </div>
+
+    <button class="btn-submit" onclick="calculateO2()">TÍNH TOÁN THỜI GIAN CÒN LẠI</button>
+</div>
+
+<!-- MÀN HÌNH KẾT QUẢ -->
+<div class="container" id="result-screen">
+    <div class="result-alert" id="alert-text">TRẠNG THÁI</div>
+    <div class="result-time" id="time-text">0h 0p</div>
+    <div id="advice-text">Khuyến cáo lâm sàng ở đây.</div>
+    <button class="btn-back" onclick="goBack()">QUAY LẠI TÍNH TIẾP</button>
+</div>
+
+<script>
+    let selectedVolume = 5;
+    let currentFlow = 5;
+
+    function selectVolume(vol, btn) {
+        selectedVolume = vol;
+        document.querySelectorAll('.btn-volume').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function updatePressure(val) {
+        document.getElementById('pressure-val').innerText = val + " bar";
+    }
+
+    function changeFlow(val) {
+        currentFlow += val;
+        if(currentFlow < 1) currentFlow = 1;
+        if(currentFlow > 20) currentFlow = 20;
+        document.getElementById('flow-display').innerText = currentFlow + " L/p";
+    }
+
+    function calculateO2() {
+        let P = parseInt(document.getElementById('pressure-slider').value);
+        let V = selectedVolume;
+        let F = currentFlow;
+        
+        // Công thức cốt lõi SKKN: T = (P * V * 0.9) / F
+        let totalMinutes = Math.floor((P * V * 0.9) / F);
+        
+        let hours = Math.floor(totalMinutes / 60);
+        let minutes = totalMinutes % 60;
+        
+        let timeString = "";
+        if (hours > 0) {
+            timeString = hours + " GIỜ " + minutes + " PHÚT";
+        } else {
+            timeString = minutes + " PHÚT";
+        }
+
+        let mainContainer = document.getElementById('main-container');
+        let resultScreen = document.getElementById('result-screen');
+        let alertText = document.getElementById('alert-text');
+        let timeText = document.getElementById('time-text');
+        let adviceText = document.getElementById('advice-text');
+
+        mainContainer.style.display = "none";
+        resultScreen.style.display = "block";
+        timeText.innerText = timeString;
+
+        // Xử lý mã hóa màu sắc tràn màn hình theo quy ước
+        if (totalMinutes > 60) {
+            resultScreen.style.backgroundColor = "#276A3C"; // Xanh an toàn
+            document.body.style.backgroundColor = "#E2EFDA";
+            alertText.innerText = "🟢 VÙNG XANH: AN TOÀN TỐI ĐA";
+            adviceText.innerText = "Nguồn Oxy cực kỳ dồi dào. Điều dưỡng hoàn toàn yên tâm thực hiện vận chuyển người bệnh nội viện hoặc thực hiện kỹ thuật.";
+        } else if (totalMinutes >= 30 && totalMinutes <= 60) {
+            resultScreen.style.backgroundColor = "#B25E00"; // Vàng cảnh báo
+            document.body.style.backgroundColor = "#FFF2CC";
+            alertText.innerText = "🟡 VÙNG VÀNG: CẦN CHÚ Ý";
+            adviceText.innerText = "Trữ lượng Oxy ở mức vừa phải. Hãy chủ động chuẩn bị sẵn bình dự phòng nếu có lộ trình đi xa hoặc chuyển viện ngoại viện.";
+        } else {
+            resultScreen.style.backgroundColor = "#C00000"; // Đỏ nguy hiểm
+            document.body.style.backgroundColor = "#FCE4D6";
+            alertText.innerText = "🔴 VÙNG ĐỎ: NGUY HIỂM CAO";
+            adviceText.innerText = "❌ TUYỆT ĐỐI KHÔNG MANG BÌNH ĐI CHUYỂN BỆNH NHÂN. Trữ lượng Oxy sắp cạn, hãy báo hộ lý thực hiện thay bình khí mới ngay lập tức!";
+        }
+    }
+
+    function goBack() {
+        document.getElementById('main-container').style.display = "block";
+        document.getElementById('result-screen').style.display = "none";
+        document.body.style.backgroundColor = "#f4f6f9";
+    }
+</script>
+</body>
+</html>
