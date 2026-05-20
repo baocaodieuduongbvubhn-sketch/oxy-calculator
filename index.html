@@ -204,8 +204,8 @@
         let V = selectedVolume;
         let F = currentFlow;
         
-        // Công thức cốt lõi SKKN: T = (P * V * 0.9) / F
-        let totalMinutes = Math.floor((P * V * 0.9) / F);
+        // Công thức cốt lõi SKKN: T = (P * V * 0.85) / F
+        let totalMinutes = Math.floor((P * V * 0.85) / F);
         
         let hours = Math.floor(totalMinutes / 60);
         let minutes = totalMinutes % 60;
@@ -242,7 +242,7 @@
             resultScreen.style.backgroundColor = "#C00000"; // Đỏ nguy hiểm
             document.body.style.backgroundColor = "#FCE4D6";
             alertText.innerText = "🔴 VÙNG ĐỎ: NGUY HIỂM CAO";
-            adviceText.innerText = "❌ TUYỆT ĐỐI KHÔNG MANG BÌNH ĐI CHUYỂN BỆNH NHÂN. Trữ lượng Oxy sắp cạn, hãy báo hộ lý thực hiện thay bình khí mới ngay lập tức!";
+            adviceText.innerText = "❌ TUYỆT ĐỐI KHÔNG MANG BÌNH ĐI CHUYỂN BỆNH NHÂN. Trữ lượng Oxy sắp cạn, hãy thực hiện thay bình khí mới ngay lập tức!";
         }
     }
 
