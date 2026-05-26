@@ -240,12 +240,12 @@
         timeText.innerText = timeString;
 
         // Xử lý mã hóa màu sắc tràn màn hình theo quy ước
-        if (totalMinutes > 60) {
+        if (totalMinutes > 120) {
             resultScreen.style.backgroundColor = "#276A3C"; // Xanh an toàn
             document.body.style.backgroundColor = "#E2EFDA";
             alertText.innerText = "🟢 VÙNG XANH: AN TOÀN TỐI ĐA";
             adviceText.innerText = "Nguồn Oxy cực kỳ dồi dào. Điều dưỡng hoàn toàn yên tâm thực hiện vận chuyển người bệnh nội viện hoặc thực hiện kỹ thuật.";
-        } else if (totalMinutes >= 30 && totalMinutes <= 60) {
+        } else if (totalMinutes >= 60 && totalMinutes <= 120) {
             resultScreen.style.backgroundColor = "#B25E00"; // Vàng cảnh báo
             document.body.style.backgroundColor = "#FFF2CC";
             alertText.innerText = "🟡 VÙNG VÀNG: CẦN CHÚ Ý";
